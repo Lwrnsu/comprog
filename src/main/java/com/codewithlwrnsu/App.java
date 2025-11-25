@@ -2,13 +2,14 @@ package com.codewithlwrnsu;
 
 import Database.DatabaseController;
 import com.codewithlwrnsu.utilities.Functions;
+
+import java.sql.SQLException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class App
 {
-    public static void main( String[] args )
-    {
+    public static void main( String[] args ) throws SQLException {
         DatabaseController db = new DatabaseController();
         Functions func = new Functions();
         Scanner scan = new Scanner(System.in);
@@ -21,8 +22,8 @@ public class App
             try {
                 System.out.println("\nWelcome to Score Tracker - DEMO.\n");
                 System.out.println("Select Services:");
-                System.out.println("1. Add Activity.");
-                System.out.println("2. View Activity.");
+                System.out.println("1. Add Score.");
+                System.out.println("2. View Scores.");
                 System.out.println("3. Calculate Grade per Subject.");
                 System.out.println("4. Add Subject.");
                 System.out.println("5. Drop Subject.");
@@ -32,10 +33,10 @@ public class App
 
                 switch(serviceOption) {
                     case 1:
-                        func.addActivities();
+                        func.addScore();
                         break;
                     case 2:
-                        func.viewActivity();
+                        func.viewScores();
                         break;
                     case 3:
                         System.out.println("3");

@@ -25,13 +25,23 @@ public class DatabaseController {
 
                 activities.put(tableName, new ArrayList<>());
 
-                String columnSql = "SELECT name FROM " + tableName + ";";
+                String columnSql = "SELECT exam, totalExam, activity, totalActivity, pTask, totalPTask FROM " + tableName + ";";
                 var columnStmt = conn.createStatement();
                 var columnRs = columnStmt.executeQuery(columnSql);
 
                 while (columnRs.next()) {
-                    String columnValue = columnRs.getString("name");
-                    activities.get(tableName).add(columnValue);
+                    String exam = String.valueOf(columnRs.getInt("exam"));
+                    String totalExam = String.valueOf(columnRs.getInt("totalExam"));
+                    String act = String.valueOf(columnRs.getInt("activity"));
+                    String totalAct = String.valueOf(columnRs.getInt("totalActivity"));
+                    String pTask = String.valueOf(columnRs.getInt("pTask"));
+                    String totalPTask = String.valueOf(columnRs.getInt("totalPTask"));
+                    activities.get(tableName).add(exam);
+                    activities.get(tableName).add(totalExam);
+                    activities.get(tableName).add(act);
+                    activities.get(tableName).add(totalAct);
+                    activities.get(tableName).add(pTask);
+                    activities.get(tableName).add(totalPTask);
                 }
             }
         } catch (SQLException e) {
@@ -42,10 +52,12 @@ public class DatabaseController {
     public static void addTable(String tableName) {
 
         var sql = "CREATE TABLE \"" + tableName + "\" ("
-                + "	name text NOT NULL, "
                 + "	exam INTEGER, "
+                + " totalExam INTEGER,"
                 + " activity INTEGER,"
+                + " totalActivity INTEGER,"
                 + " pTask INTEGER,"
+                + " totalPTask INTEGER,"
                 + " created_at text NOT NULL"
                 + " );";
 
@@ -59,15 +71,19 @@ public class DatabaseController {
         }
     }
 
-        public static void addActivities(String tableName, String name, int score, String date) {
+        public static void addActivities(String tableName, int exam, int totalExam, int activity, int totalActivity, int pTask, int totalPTask, String date) {
 
-            String sql = "INSERT INTO \"" + tableName + "\" (name, score, created_at) VALUES(?,?,?);";
+            String sql = "INSERT INTO \"" + tableName + "\" (exam, totalExam, activity, TotalActivity, pTask, totalPTask, created_at) VALUES(?,?,?,?,?,?,?);";
 
             try (var conn = DriverManager.getConnection(url);
                  var pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, name);
-                pstmt.setInt(2, score);
-                pstmt.setString(3, date);
+                pstmt.setInt(1, exam);
+                pstmt.setInt(2, totalExam);
+                pstmt.setInt(3, activity);
+                pstmt.setInt(4, totalActivity);
+                pstmt.setInt(5, pTask);
+                pstmt.setInt(6, totalPTask);
+                pstmt.setString(7, date);
                 pstmt.executeUpdate();
                 connect();
             } catch (SQLException e) {
@@ -75,9 +91,9 @@ public class DatabaseController {
             }
         }
 
-        public static void viewActivities(String tableName) {
+        public static void viewNames(String tableName) {
 
-            String sql = "SELECT name, score, created_at FROM \"" + tableName + "\";";
+            String sql = "SELECT exam, activity, pTask, created_at FROM \"" + tableName + "\";";
             int i  = 1;
 
             try (var conn = DriverManager.getConnection(url);
@@ -86,10 +102,15 @@ public class DatabaseController {
                 ResultSet rs = pstmt.executeQuery();
 
                 while(rs.next()) {
-                    String name = rs.getString("name");
-                    int score = rs.getInt("score");
+                    int exam = rs.getInt("exam");
+                    int activity = rs.getInt("activity");
+                    int pTask = rs.getInt("pTask");
                     String date = rs.getString("created_at");
-                    System.out.println(i + ". " + "Activity Name: " + name + " | Score: " + score + " | Date: " + date);
+                    System.out.println(i + ". "
+                            + " | Exam: " + exam
+                            + " | Activity: " + activity
+                            + " | Performance Task: " + pTask
+                            + " | Date: " + date);
                     i++;
                 }
 
@@ -98,23 +119,13 @@ public class DatabaseController {
             }
         }
 
-        public static void deleteActivity(String tableName, String name) {
-            String sql = "DELETE FROM \"" + tableName + "\" WHERE name='" + name + "';";
-            try (var conn = DriverManager.getConnection(url);
-                 var pstmt = conn.prepareStatement(sql)) {
-                    pstmt.execute();
-                    connect();
-                    System.out.println("\nSuccessfully Deleted.");
-            } catch (SQLException e) {
-                System.err.println(e.getMessage());
-            }
-        }
-
-        public static void updateActivity(String tableName, String updatedName, String originalName,
-                                          int updatedScore) {
-            String sql = "UPDATE \"" + tableName + "\" SET name='" + updatedName
-                    + "', score='" + updatedScore + "'" + " WHERE name='"
-                    + originalName + "';";
+        public static void updateActivity(String tableName,
+                                          int updatedExam, int updatedActivity, int updatedPTask) {
+            String sql = "UPDATE \"" + tableName
+                    + "\" SET exam='" + updatedExam
+                    + "', activity='" + updatedActivity
+                    + "', pTask='" + updatedPTask
+                    + "';";
             try (var conn = DriverManager.getConnection(url);
                  var pstmt = conn.prepareStatement(sql)) {
                 pstmt.execute();
@@ -129,6 +140,39 @@ public class DatabaseController {
                  var stmt = conn.prepareStatement(sql)) {
                 stmt.execute();
                 connect();
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }
+
+        public static void calculate(String tableName, int rExam, int rAct, int rPTask) {
+            String sql = "SELECT exam, totalExam, activity, totalActivity, pTask, totalPTask FROM " + tableName
+                    + ";";
+            try (var conn = DriverManager.getConnection(url);
+                 var stmt = conn.prepareStatement(sql)) {
+                var rs = stmt.executeQuery();
+
+                while (rs.next()) {
+                    int exam = rs.getInt("exam");
+                    int totalExam = rs.getInt("totalExam");
+                    int activity = rs.getInt("activity");
+                    int totalActivity = rs.getInt("totalActivity");
+                    int pTask = rs.getInt("pTask");
+                    int totalPTask = rs.getInt("totalPTask");
+
+                    double examCalc = (exam/totalExam) * 100;
+                    double actCalc = (activity/totalActivity) * 100;
+                    double pTaskCalc = (pTask/totalPTask) * 100;
+                    double finalGrade = (examCalc * (rExam/100)) + (actCalc * (rAct/100)) + (pTaskCalc * (rPTask/100));
+
+                    System.out.println("Computed Grades for: " + tableName);
+                    System.out.println("Exam: " + examCalc
+                            + " | Activity: " + actCalc
+                            + " | Performance Task: " + pTaskCalc);
+                    System.out.printf("Final Grade: %.2f\n", finalGrade);
+                    System.out.println("Rounded off: " + Math.round(finalGrade));
+                }
+
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
