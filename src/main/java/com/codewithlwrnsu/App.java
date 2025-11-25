@@ -39,7 +39,7 @@ public class App
                         func.viewScores();
                         break;
                     case 3:
-                        System.out.println("3");
+                        func.calcGrades();
                         break;
                     case 4:
                         func.addSubjects();

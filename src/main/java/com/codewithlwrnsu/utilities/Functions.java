@@ -48,6 +48,7 @@ public class Functions {
     }
 
     public void addSubjects() {
+        scan.nextLine();
         System.out.print("Enter name: ");
         String tableName = scan.nextLine();
         data.addTable(tableName);
@@ -114,12 +115,13 @@ public class Functions {
         viewSubjects();
         System.out.print("Enter subject: ");
         int num = scan.nextInt();
+        String tableName = tables.get(num - 1);
         System.out.print("Enter Exam Rubrics (No % sign.): ");
         int exam = scan.nextInt();
         System.out.print("Enter Activity Rubrics (No % sign.): ");
         int act = scan.nextInt();
         System.out.print("Enter Performance Task Rubrics (No % sign.): ");
         int pTask = scan.nextInt();
-
+        data.calculate(tableName, exam, act, pTask);
     }
 }

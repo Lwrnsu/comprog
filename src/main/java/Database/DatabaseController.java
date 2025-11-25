@@ -160,15 +160,13 @@ public class DatabaseController {
                     int pTask = rs.getInt("pTask");
                     int totalPTask = rs.getInt("totalPTask");
 
-                    double examCalc = (exam/totalExam) * 100;
-                    double actCalc = (activity/totalActivity) * 100;
-                    double pTaskCalc = (pTask/totalPTask) * 100;
-                    double finalGrade = (examCalc * (rExam/100)) + (actCalc * (rAct/100)) + (pTaskCalc * (rPTask/100));
+                    double examCalc = ((double) exam/totalExam) * 100;
+                    double actCalc = ((double)activity/totalActivity) * 100;
+                    double pTaskCalc = ((double)pTask/totalPTask) * 100;
+                    double finalGrade = (examCalc * ((double) rExam /100)) + (actCalc * ((double) rAct /100)) + (pTaskCalc * ((double) rPTask /100));
 
                     System.out.println("Computed Grades for: " + tableName);
-                    System.out.println("Exam: " + examCalc
-                            + " | Activity: " + actCalc
-                            + " | Performance Task: " + pTaskCalc);
+                    System.out.printf("Exam: %.2f | Activity: %.2f | Performance Task: %.2f\n", examCalc, actCalc, pTaskCalc);
                     System.out.printf("Final Grade: %.2f\n", finalGrade);
                     System.out.println("Rounded off: " + Math.round(finalGrade));
                 }
