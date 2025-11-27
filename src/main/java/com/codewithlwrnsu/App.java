@@ -30,6 +30,7 @@ public class App
                 System.out.println("6. Exit.");
                 System.out.print("\nEnter your choice: ");
                 serviceOption = scan.nextInt();
+                scan.nextLine();
 
                 switch(serviceOption) {
                     case 1:

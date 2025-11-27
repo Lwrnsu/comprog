@@ -36,10 +36,7 @@ public class Functions {
                         int pTaskScore = scan.nextInt();
                         System.out.print("Total Performance Task: ");
                         int totalPTaskScore = scan.nextInt();
-                        LocalDate now = LocalDate.now();
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                        String today = now.format(formatter);
-                        data.addActivities(name, examScore, totalExamScore, activityScore, totalActivityScore, pTaskScore, totalPTaskScore,today);
+                        data.addActivities(name, examScore, totalExamScore, activityScore, totalActivityScore, pTaskScore, totalPTaskScore);
                     } else {
                         System.out.println("Already has an score, please update to \"View Scores\"");
                     }
@@ -57,18 +54,24 @@ public class Functions {
 
     public void addSubjects() {
         try {
-            scan.nextLine();
             System.out.print("Enter name: ");
-            String tableName = scan.nextLine();
+            String tableName = scan.nextLine().trim();
+            if(tableName.isEmpty()) {
+                System.out.println("Invalid table name!");
+                return;
+            }
             data.addTable(tableName);
             System.out.print("Enter Exam Rubrics (No %): ");
-            int rExam = scan.nextInt();
+            int rExam = Integer.parseInt(scan.nextLine());
             System.out.print("Enter Activity Rubrics (No %): ");
-            int rAct = scan.nextInt();
+            int rAct = Integer.parseInt(scan.nextLine());
             System.out.print("Enter Performance Task Rubrics (No %): ");
-            int rPTask = scan.nextInt();
+            int rPTask = Integer.parseInt(scan.nextLine());
             System.out.println("Subject Added: " + tableName);
-            data.addSubject(tableName, rExam, rAct, rPTask);
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String today = now.format(formatter);
+            data.addSubject(tableName, rExam, rAct, rPTask, today);
         } catch (InputMismatchException e) {
             System.out.println(e.getMessage());
         }

@@ -30,18 +30,18 @@ public class DatabaseController {
                 var columnRs = columnStmt.executeQuery(columnSql);
 
                 while (columnRs.next()) {
-                    String exam = String.valueOf(columnRs.getInt("exam"));
-                    String totalExam = String.valueOf(columnRs.getInt("totalExam"));
-                    String act = String.valueOf(columnRs.getInt("activity"));
-                    String totalAct = String.valueOf(columnRs.getInt("totalActivity"));
-                    String pTask = String.valueOf(columnRs.getInt("pTask"));
-                    String totalPTask = String.valueOf(columnRs.getInt("totalPTask"));
-                    activities.get(tableName).add(exam);
-                    activities.get(tableName).add(totalExam);
-                    activities.get(tableName).add(act);
-                    activities.get(tableName).add(totalAct);
-                    activities.get(tableName).add(pTask);
-                    activities.get(tableName).add(totalPTask);
+                    Integer exam = (Integer) columnRs.getObject("exam");
+                    Integer totalExam = (Integer) columnRs.getObject("totalExam");
+                    Integer act = (Integer) columnRs.getObject("activity");
+                    Integer totalAct = (Integer) columnRs.getObject("totalActivity");
+                    Integer pTask = (Integer) columnRs.getObject("pTask");
+                    Integer totalPTask = (Integer) columnRs.getObject("totalPTask");
+                    if (exam != null) activities.get(tableName).add(String.valueOf(exam));
+                    if (totalExam != null) activities.get(tableName).add(String.valueOf(totalExam));
+                    if (act != null) activities.get(tableName).add(String.valueOf(act));
+                    if (totalAct != null) activities.get(tableName).add(String.valueOf(totalAct));
+                    if (pTask != null) activities.get(tableName).add(String.valueOf(pTask));
+                    if (totalPTask != null) activities.get(tableName).add(String.valueOf(totalPTask));
                 }
             }
         } catch (SQLException e) {
@@ -51,7 +51,7 @@ public class DatabaseController {
 
     public static void addTable(String tableName) {
 
-        var sql = "CREATE TABLE \"" + tableName + "\" ("
+        var sql = "CREATE TABLE IF NOT EXISTS \"" + tableName + "\" ("
                 + "	exam INTEGER, "
                 + " totalExam INTEGER,"
                 + " activity INTEGER,"
@@ -61,8 +61,8 @@ public class DatabaseController {
                 + " rubrics_exam INTEGER,"
                 + " rubrics_activity INTEGER,"
                 + " rubrics_pTask INTEGER,"
-                + " created_at text"
-                + " );";
+                + " created_at text NOT NULL"
+                + " )";
 
         try (var conn = DriverManager.getConnection(url);
              var stmt = conn.createStatement()) {
@@ -74,19 +74,19 @@ public class DatabaseController {
         }
     }
 
-        public static void addActivities(String tableName, int exam, int totalExam, int activity, int totalActivity, int pTask, int totalPTask, String date) {
+        public static void addActivities(String tableName, int exam, int totalExam, int activity, int totalActivity, int pTask, int totalPTask) {
 
-            String sql = "INSERT INTO \"" + tableName + "\" (exam, totalExam, activity, TotalActivity, pTask, totalPTask, created_at) VALUES(?,?,?,?,?,?,?);";
+            String sql = "UPDATE \"" + tableName
+                    + "\" SET exam='" + exam
+                    + "', totalExam='" + totalExam
+                    + "', activity='" + activity
+                    + "', totalActivity='" + totalActivity
+                    + "', pTask='" + pTask
+                    + "', totalPTask='" +totalPTask
+                    + "';";
 
             try (var conn = DriverManager.getConnection(url);
                  var pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, exam);
-                pstmt.setInt(2, totalExam);
-                pstmt.setInt(3, activity);
-                pstmt.setInt(4, totalActivity);
-                pstmt.setInt(5, pTask);
-                pstmt.setInt(6, totalPTask);
-                pstmt.setString(7, date);
                 pstmt.executeUpdate();
                 connect();
             } catch (SQLException e) {
@@ -132,6 +132,7 @@ public class DatabaseController {
             try (var conn = DriverManager.getConnection(url);
                  var pstmt = conn.prepareStatement(sql)) {
                 pstmt.executeUpdate();
+                connect();
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -155,6 +156,7 @@ public class DatabaseController {
                     + ";";
             try (var conn = DriverManager.getConnection(url);
                  var stmt = conn.prepareStatement(sql)) {
+
                 var rs = stmt.executeQuery();
 
                 while (rs.next()) {
@@ -164,19 +166,21 @@ public class DatabaseController {
                     int totalActivity = rs.getInt("totalActivity");
                     int pTask = rs.getInt("pTask");
                     int totalPTask = rs.getInt("totalPTask");
-                    double rExam = (double) rs.getInt("rubrics_exam") / 100;
-                    double rAct = (double) rs.getInt("rubrics_activity") / 100;
-                    double rPTask = (double) rs.getInt("rubrics_pTask") / 100;
+                    int rExam = rs.getInt("rubrics_exam");
+                    int rAct = rs.getInt("rubrics_activity");
+                    int rPTask = rs.getInt("rubrics_pTask");
 
-                    double examCalc = ((double) exam/totalExam) * 100;
-                    double actCalc = ((double)activity/totalActivity) * 100;
-                    double pTaskCalc = ((double)pTask/totalPTask) * 100;
-                    double finalGrade = (examCalc * (rExam /100)) + (actCalc * (rAct /100)) + (pTaskCalc * (rPTask /100));
+                    double examCalc = (totalExam == 0) ? 0 : ((double) exam / totalExam) * 100;
+                    double actCalc = (totalActivity == 0) ? 0 : ((double) activity / totalActivity) * 100;
+                    double pTaskCalc = (totalPTask == 0) ? 0 : ((double) pTask / totalPTask) * 100;
 
-                    System.out.println(rExam);
+                    double finalGrade = (examCalc * ((double) rExam / 100)) +
+                            (actCalc * ((double) rAct / 100)) +
+                            (pTaskCalc * ((double) rPTask / 100));
 
                     System.out.println("Computed Grades for: " + tableName);
-                    System.out.printf("Exam: %.2f | Activity: %.2f | Performance Task: %.2f\n", examCalc, actCalc, pTaskCalc);
+                    System.out.printf("Exam: %.2f | Activity: %.2f | Performance Task: %.2f\n",
+                            examCalc, actCalc, pTaskCalc);
                     System.out.printf("Final Grade: %.2f\n", finalGrade);
                     System.out.println("Rounded off: " + Math.round(finalGrade));
                 }
@@ -186,9 +190,9 @@ public class DatabaseController {
             }
         }
 
-        public static void addSubject(String tableName, int rExam, int rAct, int rPTask) {
+        public static void addSubject(String tableName, int rExam, int rAct, int rPTask, String date) {
 
-            String sql = "INSERT INTO \"" + tableName + "\" (rubrics_exam, rubrics_activity, rubrics_pTask) VALUES(?,?,?);";
+            String sql = "INSERT INTO \"" + tableName + "\" (rubrics_exam, rubrics_activity, rubrics_pTask, created_at) VALUES(?,?,?,?);";
 
             try (var conn = DriverManager.getConnection(url);
                  var stmt = conn.prepareStatement(sql)) {
@@ -196,8 +200,8 @@ public class DatabaseController {
                 stmt.setInt(1, rExam);
                 stmt.setInt(2, rAct);
                 stmt.setInt(3, rPTask);
+                stmt.setString(4, date);
                 stmt.executeUpdate();
-                connect();
 
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
