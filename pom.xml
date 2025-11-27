@@ -51,7 +51,6 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <!-- This goes inside <configuration> -->
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>all</shadedClassifierName>
