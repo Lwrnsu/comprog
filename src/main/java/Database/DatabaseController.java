@@ -58,7 +58,10 @@ public class DatabaseController {
                 + " totalActivity INTEGER,"
                 + " pTask INTEGER,"
                 + " totalPTask INTEGER,"
-                + " created_at text NOT NULL"
+                + " rubrics_exam INTEGER,"
+                + " rubrics_activity INTEGER,"
+                + " rubrics_pTask INTEGER,"
+                + " created_at text"
                 + " );";
 
         try (var conn = DriverManager.getConnection(url);
@@ -128,7 +131,7 @@ public class DatabaseController {
                     + "';";
             try (var conn = DriverManager.getConnection(url);
                  var pstmt = conn.prepareStatement(sql)) {
-                pstmt.execute();
+                pstmt.executeUpdate();
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
@@ -145,8 +148,10 @@ public class DatabaseController {
             }
         }
 
-        public static void calculate(String tableName, int rExam, int rAct, int rPTask) {
-            String sql = "SELECT exam, totalExam, activity, totalActivity, pTask, totalPTask FROM " + tableName
+        public static void calculate(String tableName) {
+            String sql = "SELECT exam, totalExam, activity, totalActivity, " +
+                    "pTask, totalPTask, rubrics_exam, rubrics_activity, " +
+                    "rubrics_pTask FROM " + tableName
                     + ";";
             try (var conn = DriverManager.getConnection(url);
                  var stmt = conn.prepareStatement(sql)) {
@@ -159,11 +164,16 @@ public class DatabaseController {
                     int totalActivity = rs.getInt("totalActivity");
                     int pTask = rs.getInt("pTask");
                     int totalPTask = rs.getInt("totalPTask");
+                    double rExam = (double) rs.getInt("rubrics_exam") / 100;
+                    double rAct = (double) rs.getInt("rubrics_activity") / 100;
+                    double rPTask = (double) rs.getInt("rubrics_pTask") / 100;
 
                     double examCalc = ((double) exam/totalExam) * 100;
                     double actCalc = ((double)activity/totalActivity) * 100;
                     double pTaskCalc = ((double)pTask/totalPTask) * 100;
-                    double finalGrade = (examCalc * ((double) rExam /100)) + (actCalc * ((double) rAct /100)) + (pTaskCalc * ((double) rPTask /100));
+                    double finalGrade = (examCalc * (rExam /100)) + (actCalc * (rAct /100)) + (pTaskCalc * (rPTask /100));
+
+                    System.out.println(rExam);
 
                     System.out.println("Computed Grades for: " + tableName);
                     System.out.printf("Exam: %.2f | Activity: %.2f | Performance Task: %.2f\n", examCalc, actCalc, pTaskCalc);
@@ -175,5 +185,26 @@ public class DatabaseController {
                 System.err.println(e.getMessage());
             }
         }
+
+        public static void addSubject(String tableName, int rExam, int rAct, int rPTask) {
+
+            String sql = "INSERT INTO \"" + tableName + "\" (rubrics_exam, rubrics_activity, rubrics_pTask) VALUES(?,?,?);";
+
+            try (var conn = DriverManager.getConnection(url);
+                 var stmt = conn.prepareStatement(sql)) {
+
+                stmt.setInt(1, rExam);
+                stmt.setInt(2, rAct);
+                stmt.setInt(3, rPTask);
+                stmt.executeUpdate();
+                connect();
+
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+
+        }
+
+
 }
 

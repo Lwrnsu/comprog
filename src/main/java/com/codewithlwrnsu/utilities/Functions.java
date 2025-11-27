@@ -61,6 +61,14 @@ public class Functions {
             System.out.print("Enter name: ");
             String tableName = scan.nextLine();
             data.addTable(tableName);
+            System.out.print("Enter Exam Rubrics (No %): ");
+            int rExam = scan.nextInt();
+            System.out.print("Enter Activity Rubrics (No %): ");
+            int rAct = scan.nextInt();
+            System.out.print("Enter Performance Task Rubrics (No %): ");
+            int rPTask = scan.nextInt();
+            System.out.println("Subject Added: " + tableName);
+            data.addSubject(tableName, rExam, rAct, rPTask);
         } catch (InputMismatchException e) {
             System.out.println(e.getMessage());
         }
@@ -122,6 +130,8 @@ public class Functions {
                 int deleteStatus = scan.nextInt();
                 if (deleteStatus == 0) {
                     System.out.println("Exit.");
+                } else if (deleteStatus > tables.size()){
+                    System.out.println("No such subject!");
                 } else {
                     String subject = tables.get(deleteStatus - 1);
                     data.dropSubject(subject);
@@ -142,13 +152,7 @@ public class Functions {
                 System.out.print("Enter subject: ");
                 int num = scan.nextInt();
                 String tableName = tables.get(num - 1);
-                System.out.print("Enter Exam Rubrics (No % sign.): ");
-                int exam = scan.nextInt();
-                System.out.print("Enter Activity Rubrics (No % sign.): ");
-                int act = scan.nextInt();
-                System.out.print("Enter Performance Task Rubrics (No % sign.): ");
-                int pTask = scan.nextInt();
-                data.calculate(tableName, exam, act, pTask);
+                data.calculate(tableName);
             } catch (InputMismatchException e) {
                 System.out.println("Wrong Input! Please Try Again!");
                 scan.nextLine();
